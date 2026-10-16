@@ -87,4 +87,4 @@ For further background, see [IntentixLab](https://intentixlab.com/).
 
 
 **Question for discussion:** A machine can verify a relation among the supplied values. What would justify accepting the situated assertion **A**, and how does a human observer recognise when their judgment is insufficiently independent?
-# proof_n_resolution
+
