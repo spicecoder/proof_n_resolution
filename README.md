@@ -1,90 +1,66 @@
-# Proof and Resolution — a small Intention Space example
+# Proof and Resolution — Two Granularities
 
-A runnable, standard-library-only Python illustration of a **Resolution Boundary Auditor (RBA)** process. It accompanies the [Proof and Resolution discussion](https://proofsandprompts.com/2026/10/15/proof-and-resolution-two-different-forms-of-establishment/). It does **not** prove a theorem or automate human judgment.
+A small, standard-library-only Python illustration of the distinction between **establishing mathematical validity** and **resolving an assertion in a declared Situational Reality**. It is intended for mathematicians and software developers; no CPUX runtime or LLM is required.
 
-## 1. Situational Reality
+The terminology **Intention**, **Pulse**, **Signal**, **Design Node (DN)** and **Situational Reality** follows the Intention Space approach described by [IntentixLab](https://intentixlab.com/). These are illustrative implementations, not a normative specification of that framework.
 
-A person is evaluating a triangular drawing in Euclidean geometry. Three interior angles have been recorded as **50°, 60°, and 70°**. The person must decide whether these observations are acceptable for the intended drawing, taking account of the source of the measurements, geometric assumptions, and the practical purpose of acceptance.
+## The core idea
 
-This is a *declared* Situational Reality, not an objective guarantee that the measurements are correct. Its purpose, description, assumptions, tolerance and human value are represented by `SituationalReality`.
+A **DN is a black box at its caller's chosen granularity**. Its internal reasoning or computation may be hidden from the caller, but the DN must expose the contract needed for responsible reuse: designated input/output Signals, assumptions, relevant justification, and provenance. Black-box *execution* is not permission for black-box *authority*.
 
-## 2. The theorem
+A **Pulse** has a named **Phrase** with a description of what is being asserted; its `state` is `Y` (established), `N` (rejected/refuted), or `U` (unresolved). Its `why` explains *why this particular state was emitted*, with optional provenance. These descriptions make a Pulse inspectable; they **do not** independently validate an unsound inference.
 
-**Euclid, Elements, Book I, Proposition 32:** the three interior angles of a Euclidean triangle add to two right angles (**180°**).
+A **Signal** groups an explicit Intention Phrase with relevant Pulses. A **Situational Reality** declares purpose, context, assumptions, and acceptance conditions. An **A** (proposal) is the assertion to be resolved. Human Resolution is a distinct decision on the applicability and sufficiency of evidence in that reality—not a way to turn false mathematics into true mathematics.
 
-This is a general mathematical result about Euclidean triangles. The program **does not prove it**; it records the theorem and its domain as a reference relevant to this situation.
+## Why two examples?
 
-## 3. What has been proposed — assertion A
+| | 01 — Established theorem as a DN | 02 — Euclid's resolution at fine granularity |
+|---|---|---|
+| Situational Reality | Decide whether reported triangle angles are acceptable for a drawing | Construct an equilateral triangle on segment AB |
+| Proposed A | Those recorded angles are acceptable | The constructed triangle ABC is equilateral |
+| Mathematical source | Euclid *Elements* I.32 (angle sum) | Euclid *Elements* I.1 (construction) |
+| Granularity | The proof of I.32 is already established and invoked as one black-box DN | Construction, observation and inference are separate DNs |
+| What is made visible | Applicability of a theorem, arithmetic, measurement reliability, observer decision | Individual dependencies and reasons for the state at each step |
+| What remains external | The actual proof of I.32 | An explicit circle-intersection warrant and soundness of rules |
 
-> **A:** The three recorded angles are acceptable as interior-angle measurements of the triangle in this drawing.
+**These are different propositions, not a claim that I.1 is a finer-grained proof of I.32.** They demonstrate the *same discipline* at two chosen granularities. One could replace any established fine-grained chain by a contracted DN at a coarser level, provided its obligations remain accessible.
 
-A is a *situated assertion*, not the general theorem. Acceptance requires more than arithmetic: the observations must be meaningful for this drawing and sufficiently reliable for its intended use.
+### 01 — Established proof, reused
 
-The deterministic Design Node checks only whether the supplied numbers are valid angle values and their sum is within the declared tolerance of 180°. Thus **50 + 60 + 70 = 180** is consistent with the theorem, but cannot prove Euclid I.32 or prove that the measurements originated from the stated triangle. Even a valid sum does not establish all conditions for a geometrically valid, accurately measured drawing.
+A theorem that has already been established may be encapsulated by `EstablishedAngleSumTheoremDN`. The caller sees only its declared applicability, conclusion and proof reference. Recorded angles 50°, 60°, 70° sum to 180°, but the result does **not** prove that the angles actually came from the claimed triangle. A separate reliability Pulse and an explicit human decision remain necessary. Failure to establish the assumptions yields `U` rather than automatic acceptance.
 
-## 4. Proof, check, and Resolution
+### 02 — Establishing Euclid I.1
 
-| Establishment | Question | Role here |
-| --- | --- | --- |
-| **Proof** | Does a general statement follow from premises? | Euclid I.32 is cited as an established theorem |
-| **Computational check** | Do these three supplied values sum to 180° within tolerance? | A Design Node returns a Signal |
-| **Resolution** | Should the human observer accept **A** in this Situational Reality? | Observer judges the claim using the result, assumptions and values |
+The argument is decomposed into DNs for drawing AB, drawing two circles, obtaining common point C, joining sides, using the definition of a circle, inferring equality, and concluding equilateralness. Each DN emits a Pulse describing **why** it has the state it has. The common-point step requires an *explicit circle-intersection warrant*. If that warrant is `U`, later claims remain `U`, and the final Resolution is `U`.
 
-Resolution is **a process, not an authority**. The final decision belongs to an observer; the protocol exposes inputs and criteria but cannot guarantee the observer's independence or correctness.
+This is **not** a machine-checked formal proof. A true formal checker would need a precise axiomatization, validated inference rules and a proof of the intersection lemma under the chosen geometry.
 
-## 5. Intention Space entities
+## Try it
 
-| Entity | What it represents |
-| --- | --- |
-| `SituationalReality` | Purpose, narrative description, assumptions, tolerance, human value |
-| `Theorem` | Referenced theorem, statement, and mathematical domain |
-| `Proposal` | Explicit proposed assertion **A** |
-| `Intention` | Purpose conveyed in a `Signal` |
-| `Pulse` | Named observation with a measure and `Y`, `N`, or `U` |
-| `Signal` | Intention paired with Pulses |
-| `AngleCheckDN` | Deterministic Design Node that emits a check Signal |
-| `Decision` | Hypothetical human observer's explicit judgment, explanation, and independence declaration |
-
-## 6. The eight visible RBA stages
-
-`R` Requirement, theorem, and proposal → `F` artefact snapshot → `C` correspondence → `A` assumptions / Situational Reality → `V` deterministic check → `P` provenance → `I` interpretation → `T` terminal Resolution.
-
-| State | Meaning |
-| --- | --- |
-| `Y` | Check passes **and** observer explicitly accepts A with an explanation and independence declaration |
-| `N` | Observer explicitly rejects A |
-| `U` | Resolution unresolved, including missing independent judgment or a failed/incomplete check without explicit human rejection |
-
-The example observer's decision is **hypothetical test input** and not an actual review. Independence is *self-declared*, not independently validated; the snapshot hash is not a guarantee of authenticity; correspondence only checks expected observation names, not deep semantic meaning.
-
-## 7. Run
-
-Python 3.10+; no external packages:
+Python 3.10+; no installation needed:
 
 ```bash
-python rba.py
+python examples/01_established_theorem.py
+python examples/02_euclid_construction.py
 python -m unittest discover -s tests -v
 ```
 
-The program prints JSON with the Situational Reality, cited theorem, proposed assertion **A**, and eight-stage Resolution trace. `sample_trace.json` provides an example.
+From another Python script, you may import the examples using `importlib` or run the scripts directly. Every example's `run(...)` returns serialisable data that includes its declared reality, theorem, A, DN trace and final Resolution.
 
-Note : ###  On Terminology and Conceptual Foundation
+## Three experiments
 
-This example adopts certain concepts and terminology from **Intention Space**, a framework for representing intentions and coordinating computational components, as introduced by [IntentixLab](https://intentixlab.com/).
+- Set `applicable=False` in example 01: theorem applicability becomes unresolved.
+- Set `measurements_trusted=False` in example 01: a valid arithmetic sum cannot certify observed measurements.
+- Set `intersection_warrant=State.U` in example 02: dependent assertions become unresolved.
 
-In particular:
+In both examples `decision=None` represents a missing human Resolution; `decision=False` represents an observer's rejection **within the Situational Reality**, not a disproof of Euclid.
 
-- **Situational Reality:** The declared context within which a proposed assertion is examined, including its assumptions, observations, requirements and relevant human judgments.
-- **Intention:** An explicit representation of what is to be established or accomplished.
-- **Pulse:** A structured representation of an observation or condition.
-- **Signal:** An intention associated with relevant Pulses, providing the context for computational interaction.
-- **Design Node (DN):** A computational component that receives designated Signals and produces Signals representing its results.
+## Scope and limitations
 
-These concepts are used here to illustrate the **Resolution process**, not to redefine mathematical proof or prescribe how mathematicians should conduct their work.
+1. `Y/N/U` record the status of an *assertion in a declared process*, not absolute mathematical truth.
+2. A DN can be implemented by a person, software or AI; neither source alone establishes authority.
+3. Phrase descriptions and `why` are explanations for audit, not proof certificates.
+4. Observer independence and quality of judgment must be examined separately; they cannot be guaranteed by following this program.
+5. This repository illustrates a principle of preserving validity obligations across **granularity changes**. It does not claim that all mathematical reasoning is algorithmic or that mathematics should serve machine requirements.
 
-For further background, see [IntentixLab](https://intentixlab.com/).
-
-
-
-**Question for discussion:** A machine can verify a relation among the supplied values. What would justify accepting the situated assertion **A**, and how does a human observer recognise when their judgment is insufficiently independent?
-
+Read the motivating article: [Proof and Resolution: Two Different Forms of Establishment](https://proofsandprompts.com/2026/10/15/proof-and-resolution-two-different-forms-of-establishment/).
